@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  spherestrike_tensorboard:
+    image: tensorflow/tensorflow
+    command: ["tensorboard", "--logdir", "/logs", "--bind_all"]
+    container_name: spherestrike-tensorboard
+    restart: "no"
+    volumes:
+      - ${MODEL_PATH}:/logs
+    ports:
+      - ${PORT_TENSORBOARD}:6006
