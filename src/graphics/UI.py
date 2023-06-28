@@ -3,8 +3,10 @@ import threading
 import tkinter as tk
 from time import sleep
 
-from core import current_time, get_env_values, is_app_alive, from_rgb
+from ai.brain import RandomBrain
+from core import current_time, from_rgb, get_env_values, is_app_alive
 from game import GameManager
+from game.entities.player import KeyBoardBrain
 
 
 class GameUI:
@@ -21,7 +23,9 @@ class GameUI:
         self.root = None
         self.game_root = None
         self.game_canva = None
+
         self.show_game = None
+        self.control_first_player = None
 
     def launch(self):
         self.tk_thread = threading.Thread(target=self.tk_ui)
@@ -41,10 +45,10 @@ class GameUI:
 
             # ROOT tick
             l = tk.Label(self.root, text=f"FPS: {self.average_fps}")
-            l.grid(column=1, row=1)
+            l.grid(column=0, row=1)
 
             l = tk.Label(self.root, text=f"TPS: {self.linked_game.average_tps}")
-            l.grid(column=2, row=1)
+            l.grid(column=1, row=1)
 
             self.root.update()
 
@@ -63,7 +67,7 @@ class GameUI:
                     )
 
                 for ball in self.linked_game.balls:
-                    speed_rgb = min(int(ball.get_speed()/2), 255)
+                    speed_rgb = min(int(ball.get_speed() / 5), 255)
                     self.game_canva.create_oval(
                         ball.X - ball.size,
                         int(get_env_values("TERRAIN_Y_SIZE")) - ball.Y - ball.size,
@@ -102,7 +106,9 @@ class GameUI:
         self.root.geometry("500x500")
 
         self.show_game = tk.BooleanVar(value=True)
+        self.control_first_player = tk.BooleanVar(value=False)
         self.show_game_button_callback()
+        self.control_first_player_button_callback()
 
         c1 = tk.Checkbutton(
             self.root,
@@ -112,12 +118,30 @@ class GameUI:
             offvalue=False,
             command=self.show_game_button_callback,
         )
-        c1.grid(column=0, row=1)
+        c1.grid(column=0, row=2)
+
+        c1 = tk.Checkbutton(
+            self.root,
+            text="Control Player 1",
+            variable=self.control_first_player,
+            onvalue=True,
+            offvalue=False,
+            command=self.control_first_player_button_callback,
+        )
+        c1.grid(column=1, row=2)
+
+    def control_first_player_button_callback(self):
+        if self.control_first_player.get():
+            if self.game_canva is not None:
+                self.linked_game.players[0].brain = KeyBoardBrain(self.game_root)
+        else:
+            self.linked_game.players[0].brain = RandomBrain()
 
     def show_game_button_callback(self):
         if self.show_game.get() and self.game_root is None:
             self.game_root = tk.Tk()
-            self.game_root.bind('<KeyPress>', self.onKeyPress)
+            if self.control_first_player.get():
+                self.linked_game.players[0].brain = KeyBoardBrain(self.game_root)
             self.game_canva = tk.Canvas(
                 self.game_root,
                 bg="black",

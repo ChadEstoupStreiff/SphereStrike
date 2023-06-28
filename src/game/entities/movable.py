@@ -1,7 +1,8 @@
 import math
 
 class MovableEntity:
-    def __init__(self, X: int, Y: int) -> None:
+    def __init__(self, X: int, Y: int, size: int) -> None:
+        self.size = size
         self.set_coordinates(X, Y)
         self.set_velocity(0, 0)
 

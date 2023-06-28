@@ -1,12 +1,11 @@
-import copy
 import logging
 import threading
 from time import sleep
 from typing import List
 
 from core import current_time, get_env_values, is_app_alive
-from game.entities.ball import Ball
-from game.entities.player import Player
+from game.entities import Player, Ball
+from ai.brain import RandomBrain
 
 
 def get_tick_time_length():
@@ -23,7 +22,7 @@ class GameManager:
         self.game_thread = None
         self.second_thread = None
 
-        self.players = [Player(X=200), Player(X=1000)]
+        self.players = [Player(X=100, brain=RandomBrain()) for _ in range(2)]
         self.balls = [Ball()]
         self.players[0].set_velocity(1000, 1000)
 
@@ -47,19 +46,19 @@ class GameManager:
                 entity.apply_gravity(time_length)
                 entity.move(time_length)
 
-                if entity.X < 0 or entity.X > int(get_env_values("TERRAIN_X_SIZE")):
+                if entity.X < entity.size or entity.X > int(get_env_values("TERRAIN_X_SIZE")) - entity.size:
                     entity.set_coordinates(
-                        min(max(0, entity.X), int(get_env_values("TERRAIN_X_SIZE"))),
+                        min(max(entity.size, entity.X), int(get_env_values("TERRAIN_X_SIZE")) - entity.size),
                         entity.Y
                     )
                     entity.set_velocity(
                         -entity.v_X * float(get_env_values("BOUNCE_PLAYER")),
                         entity.v_Y
                     )
-                if entity.Y < 0:
+                if entity.Y < entity.size:
                     entity.set_coordinates(
                         entity.X,
-                        0
+                        entity.size
                     )
                     if entity.v_X > 10 or entity.v_X < -10:
                         entity.set_velocity(
@@ -71,10 +70,10 @@ class GameManager:
                             0,
                             0
                         )
-                elif entity.Y > int(get_env_values("TERRAIN_Y_SIZE")):
+                elif entity.Y > int(get_env_values("TERRAIN_Y_SIZE")) - entity.size:
                     entity.set_coordinates(
                         entity.X,
-                        int(get_env_values("TERRAIN_Y_SIZE"))
+                        int(get_env_values("TERRAIN_Y_SIZE")) - entity.size
                     )
                     entity.set_velocity(
                         entity.v_X,
@@ -85,19 +84,19 @@ class GameManager:
                 entity.apply_gravity(time_length)
                 entity.move(time_length)
 
-                if entity.X < 0 or entity.X > int(get_env_values("TERRAIN_X_SIZE")):
+                if entity.X < entity.size or entity.X > int(get_env_values("TERRAIN_X_SIZE")) - entity.size:
                     entity.set_coordinates(
-                        min(max(0, entity.X), int(get_env_values("TERRAIN_X_SIZE"))),
+                        min(max(entity.size, entity.X), int(get_env_values("TERRAIN_X_SIZE")) - entity.size),
                         entity.Y
                     )
                     entity.set_velocity(
                         -entity.v_X * float(get_env_values("BOUNCE_BALL")),
                         entity.v_Y
                     )
-                if entity.Y < 0 or entity.Y > int(get_env_values("TERRAIN_Y_SIZE")):
+                if entity.Y < entity.size or entity.Y > int(get_env_values("TERRAIN_Y_SIZE")) - entity.size:
                     entity.set_coordinates(
                         entity.X,
-                        min(max(0, entity.Y), int(get_env_values("TERRAIN_Y_SIZE")))
+                        min(max(entity.size, entity.Y), int(get_env_values("TERRAIN_Y_SIZE")) - entity.size)
                     )
                     entity.set_velocity(
                         entity.v_X,
