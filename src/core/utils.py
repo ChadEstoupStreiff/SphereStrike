@@ -20,6 +20,9 @@ def get_env_values(key: str = None) -> Union[str, Dict[str, str]]:
     else:
         return __ENV_VALUES[key]
 
+def set_env_value(key: str, value: Any) -> None:
+    global __ENV_VALUES
+    __ENV_VALUES[key] = value
 
 def set_env_values(values: Dict[str, Any]) -> None:
     global __ENV_VALUES

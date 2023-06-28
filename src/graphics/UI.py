@@ -7,6 +7,7 @@ from ai.brain import RandomBrain
 from core import current_time, from_rgb, get_env_values, is_app_alive
 from game import GameManager
 from game.entities.player import KeyBoardBrain
+from core.utils import set_env_value
 
 
 class GameUI:
@@ -26,6 +27,7 @@ class GameUI:
 
         self.show_game = None
         self.control_first_player = None
+        self.skipt_tps_sleep = None
 
     def launch(self):
         self.tk_thread = threading.Thread(target=self.tk_ui)
@@ -107,6 +109,7 @@ class GameUI:
 
         self.show_game = tk.BooleanVar(value=True)
         self.control_first_player = tk.BooleanVar(value=False)
+        self.skipt_tps_sleep = tk.BooleanVar(value=False)
         self.show_game_button_callback()
         self.control_first_player_button_callback()
 
@@ -129,6 +132,19 @@ class GameUI:
             command=self.control_first_player_button_callback,
         )
         c1.grid(column=1, row=2)
+
+        c1 = tk.Checkbutton(
+            self.root,
+            text="Skip TPS sleep",
+            variable=self.skipt_tps_sleep,
+            onvalue=True,
+            offvalue=False,
+            command=self.skipt_tps_sleep_button_callback,
+        )
+        c1.grid(column=2, row=2)
+    
+    def skipt_tps_sleep_button_callback(self):
+        set_env_value("SKIP_TPS_SLEEP", self.skipt_tps_sleep.get())
 
     def control_first_player_button_callback(self):
         if self.control_first_player.get():

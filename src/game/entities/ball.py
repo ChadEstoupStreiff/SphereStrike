@@ -1,5 +1,5 @@
-from game.entities.gravity import GravityEntity
+from game.entities import GravityEntity, ColidableEntity
 
-class Ball(GravityEntity):
+class Ball(ColidableEntity, GravityEntity):
     def __init__(self, X: int = 600, Y: int = 500, size: int = 40) -> None:
-        super().__init__(X, Y, size)
+        super().__init__(X, Y, size, 30)

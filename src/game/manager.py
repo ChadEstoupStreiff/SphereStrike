@@ -22,7 +22,11 @@ class GameManager:
         self.game_thread = None
         self.second_thread = None
 
-        self.players = [Player(X=100, brain=RandomBrain()) for _ in range(2)]
+        # self.players = [Player(X=100, brain=RandomBrain()) for _ in range(2)]
+        self.players = [
+            Player(X=200, brain=RandomBrain()),
+            Player(X=1000, brain=RandomBrain()),
+        ]
         self.balls = [Ball()]
         self.players[0].set_velocity(1000, 1000)
 
@@ -103,9 +107,20 @@ class GameManager:
                         -entity.v_Y * float(get_env_values("BOUNCE_BALL"))
                     )
 
+            entities = []
+            for player in self.players:
+                entities.append(player)
+            for ball in self.balls:
+                entities.append(ball)
+            
+            for i in range(len(entities) - 1):
+                for j in range(i+1, len(entities)):
+                    entities[i].check_colision(entities[j])
+
             self.tick += 1
             end = current_time()
-            sleep(max(0, (1000.0 / int(get_env_values("TPS")) - end + start) / 1000.0))
+            if not bool(int(get_env_values("SKIP_TPS_SLEEP"))):
+                sleep(max(0, (1000.0 / int(get_env_values("TPS")) - end + start) / 1000.0))
         logging.debug("Ending game_tick game thread")
 
     def second_tick(self):
