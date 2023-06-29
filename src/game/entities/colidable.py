@@ -1,5 +1,5 @@
-import logging
 import math
+import numpy as np
 
 from core import get_env_values
 from game.entities import MovableEntity
@@ -10,14 +10,27 @@ class ColidableEntity(MovableEntity):
         super().__init__(X, Y, size)
         self.weight = weight
 
-    def check_colision(self, entity):
+    def check_colision(self, entity, time: int):
         distance = math.sqrt((self.X - entity.X) ** 2 + (self.Y - entity.Y) ** 2)
         sizes = self.size + entity.size
         if distance < sizes:
             if distance != 0:
+
+                vA_final, vB_final = calculate_final_velocities(
+                    [self.X, self.Y],
+                    [self.v_X, self.v_Y],
+                    self.weight,
+                    [entity.X, self.Y],
+                    [entity.v_X, entity.v_Y],
+                    entity.weight,
+                )
+
+                self.set_velocity(vA_final[0], vA_final[1])
+                entity.set_velocity(vB_final[0], vB_final[1])
+
                 # normalized direction vector
-                v_X = abs(entity.X - self.X) / distance
-                v_Y = abs(entity.Y - self.Y) / distance
+                v_X = (entity.X - self.X) / distance
+                v_Y = (entity.Y - self.Y) / distance
 
                 # replace
                 self.set_coordinates(
@@ -29,37 +42,21 @@ class ColidableEntity(MovableEntity):
                     entity.Y + v_Y * (sizes - distance),
                 )
 
-                # Scalar product
-                u = (self.v_X, self.v_Y)
-                v = (entity.X - self.X, entity.Y - self.Y)
+def calculate_final_velocities(pA, vA, m_A, pB, vB, m_B):
+    pA = np.array(pA)
+    pB = np.array(pB)
+    vA = np.array(vA)
+    vB = np.array(vB)
 
-                v_m = math.sqrt(v[0] ** 2 + v[1] ** 2)
-                v_u = (u[0] / v_m, u[1] / v_m)
+    d = pB - pA
+    d = d / np.linalg.norm(d)
 
-                ps = u[0] * v_u[0] + u[1] * v_u[1]
+    vA_parallel = np.dot(vA, d) * d
+    vA_perpendicular = vA - vA_parallel
+    vB_parallel = np.dot(vB, d) * d
+    vB_perpendicular = vB - vB_parallel
 
-                proj_u = (ps * v_u[0], ps * v_u[1])
+    vA_final = (vA_parallel * (m_A - m_B) + 2 * m_B * vB_parallel) / (m_A + m_B) + vA_perpendicular
+    vB_final = (vB_parallel * (m_B - m_A) + 2 * m_A * vA_parallel) / (m_A + m_B) + vB_perpendicular
 
-                # acceleration
-                # logging.debug(proj_u)
-                entity.apply_acceleration(
-                    float(get_env_values("COLISION"))/1000000000000 * self.weight * proj_u[0],
-                    float(get_env_values("COLISION"))/1000000000000 * self.weight * proj_u[1],
-                )
-
-                # Scalar product
-                u = (entity.v_X, entity.v_Y)
-                v = (self.X - entity.X, self.Y - entity.Y)
-
-                v_m = math.sqrt(v[0] ** 2 + v[1] ** 2)
-                v_u = (u[0] / v_m, u[1] / v_m)
-
-                ps = u[0] * v_u[0] + u[1] * v_u[1]
-
-                proj_u = (ps * v_u[0], ps * v_u[1])
-
-                # acceleration
-                self.apply_acceleration(
-                    float(get_env_values("COLISION"))/1000000000000 * entity.weight * proj_u[0],
-                    float(get_env_values("COLISION"))/1000000000000 * entity.weight * proj_u[1],
-                )
+    return vA_final, vB_final

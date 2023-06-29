@@ -1,4 +1,5 @@
 import logging
+import sys
 import threading
 import tkinter as tk
 from time import sleep
@@ -133,18 +134,25 @@ class GameUI:
         )
         c1.grid(column=1, row=2)
 
-        c1 = tk.Checkbutton(
-            self.root,
-            text="Skip TPS sleep",
-            variable=self.skipt_tps_sleep,
-            onvalue=True,
-            offvalue=False,
-            command=self.skipt_tps_sleep_button_callback,
-        )
-        c1.grid(column=2, row=2)
-    
-    def skipt_tps_sleep_button_callback(self):
-        set_env_value("SKIP_TPS_SLEEP", self.skipt_tps_sleep.get())
+        # c1 = tk.Checkbutton(
+        #     self.root,
+        #     text="Skip TPS sleep",
+        #     variable=self.skipt_tps_sleep,
+        #     onvalue=True,
+        #     offvalue=False,
+        #     command=self.skipt_tps_sleep_button_callback,
+        # )
+        # c1.grid(column=2, row=2)
+
+        s = tk.Scale(self.root, from_=0, to=500, orient="horizontal", length=300, command=self.set_game_speed)
+        s.set(100)
+        s.grid(column=0, row=3, columnspan=2)
+
+    def set_game_speed(self, a):
+        if int(a) == 500:
+            set_env_value("TPS_SPEED", sys.float_info.max)
+        else:
+            set_env_value("TPS_SPEED", int(a)/100.)
 
     def control_first_player_button_callback(self):
         if self.control_first_player.get():

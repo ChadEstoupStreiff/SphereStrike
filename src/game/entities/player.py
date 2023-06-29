@@ -7,7 +7,7 @@ from game.entities import GravityEntity, ColidableEntity
 
 class PlayerBrain(ABC):
     @abstractmethod
-    def get_inputs(self) -> List[bool]:
+    def get_inputs(self, game) -> List[bool]:
         # [JUMP, LEFT, RIGHT]
         raise NotImplementedError
 
@@ -39,23 +39,23 @@ class KeyBoardBrain(PlayerBrain):
         elif e.keysym == "e":
             self.right = False
 
-    def get_inputs(self) -> List[bool]:
+    def get_inputs(self, _) -> List[bool]:
         inputs = [self.jump, self.left, self.right]
         self.jump = False
         return inputs
 
 
-class Player(GravityEntity, ColidableEntity):
+class Player(ColidableEntity, GravityEntity):
     def __init__(
         self, size: int = 20, X: int = 600, Y: int = 400, brain: PlayerBrain = None
     ) -> None:
-        super().__init__(X, Y, size)
+        super().__init__(X, Y, size, 30)
         self.brain = brain
         self.double_jump = True
 
-    def move(self, time: int):
+    def move(self, time: int, game):
         if self.brain is not None:
-            inputs = self.brain.get_inputs()
+            inputs = self.brain.get_inputs(game)
 
             if self.Y == self.size:
                 if inputs[0]:

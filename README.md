@@ -19,12 +19,3 @@ Make sure you have conda environment enabled.
 
 Execute launch script  
 > bash launch.sh
-
-## Launch tensorboard
-**Install docker and docker-compose**  
-
-Edit .env with values you need  
-> nano .env
-
-Launch tensorboard by executing this command:  
-> docker-compose up -d
