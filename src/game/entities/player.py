@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from core import get_env_values
-from game.entities import GravityEntity, ColidableEntity
+from game.entities import ColidableEntity, GravityEntity
 
 
 class PlayerBrain(ABC):
@@ -47,9 +47,16 @@ class KeyBoardBrain(PlayerBrain):
 
 class Player(ColidableEntity, GravityEntity):
     def __init__(
-        self, size: int = 20, X: int = 600, Y: int = 400, brain: PlayerBrain = None
+        self,
+        color: str = "yellow",
+        size: int = 20,
+        X: int = 600,
+        Y: int = 400,
+        brain: PlayerBrain = None,
     ) -> None:
         super().__init__(X, Y, size, 30)
+        self.color = color
+        self.points = 0
         self.brain = brain
         self.double_jump = True
 

@@ -6,9 +6,9 @@ from time import sleep
 
 from ai.brain import RandomBrain
 from core import current_time, from_rgb, get_env_values, is_app_alive
+from core.utils import set_env_value
 from game import GameManager
 from game.entities.player import KeyBoardBrain
-from core.utils import set_env_value
 
 
 class GameUI:
@@ -59,13 +59,23 @@ class GameUI:
             if self.game_canva is not None:
                 self.game_canva.delete("all")
 
+                for goal in self.linked_game.goals:
+                    self.game_canva.create_rectangle(
+                        goal.c1x,
+                        int(get_env_values("TERRAIN_Y_SIZE")) - goal.c1y,
+                        goal.c2x,
+                        int(get_env_values("TERRAIN_Y_SIZE")) - goal.c2y,
+                        fill=goal.owner.color,
+                        width=0,
+                    )
+
                 for player in self.linked_game.players:
                     self.game_canva.create_oval(
                         player.X - player.size,
                         int(get_env_values("TERRAIN_Y_SIZE")) - player.Y - player.size,
                         player.X + player.size,
                         int(get_env_values("TERRAIN_Y_SIZE")) - player.Y + player.size,
-                        fill="yellow",
+                        fill=player.color,
                         width=0,
                     )
 
@@ -98,7 +108,7 @@ class GameUI:
             self.average_fps = self.tick - self.average_last_tick
             self.average_last_tick = self.tick
 
-            if self.average_fps < int(get_env_values("FPS")) - 1:
+            if self.average_fps < int(get_env_values("FPS")) * 0.9:
                 logging.warning(f"Average FPS: {self.average_fps}")
             else:
                 logging.debug(f"Average FPS: {self.average_fps}")
@@ -144,7 +154,14 @@ class GameUI:
         # )
         # c1.grid(column=2, row=2)
 
-        s = tk.Scale(self.root, from_=0, to=500, orient="horizontal", length=300, command=self.set_game_speed)
+        s = tk.Scale(
+            self.root,
+            from_=0,
+            to=500,
+            orient="horizontal",
+            length=300,
+            command=self.set_game_speed,
+        )
         s.set(100)
         s.grid(column=0, row=3, columnspan=2)
 
@@ -152,7 +169,7 @@ class GameUI:
         if int(a) == 500:
             set_env_value("TPS_SPEED", sys.float_info.max)
         else:
-            set_env_value("TPS_SPEED", int(a)/100.)
+            set_env_value("TPS_SPEED", int(a) / 100.0)
 
     def control_first_player_button_callback(self):
         if self.control_first_player.get():

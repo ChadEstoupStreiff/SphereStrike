@@ -10,11 +10,10 @@ class ColidableEntity(MovableEntity):
         super().__init__(X, Y, size)
         self.weight = weight
 
-    def check_colision(self, entity, time: int):
+    def check_colision(self, entity) -> bool:
         distance = math.sqrt((self.X - entity.X) ** 2 + (self.Y - entity.Y) ** 2)
         sizes = self.size + entity.size
-        if distance < sizes:
-            if distance != 0:
+        if distance < sizes and distance != 0:
 
                 vA_final, vB_final = calculate_final_velocities(
                     [self.X, self.Y],
@@ -41,6 +40,9 @@ class ColidableEntity(MovableEntity):
                     entity.X + v_X * (sizes - distance),
                     entity.Y + v_Y * (sizes - distance),
                 )
+
+                return True
+        return False
 
 def calculate_final_velocities(pA, vA, m_A, pB, vB, m_B):
     pA = np.array(pA)
