@@ -63,7 +63,7 @@ class AIBrain(PlayerBrain):
     def save_model(self):
         if self.model is not None:
             model_folder = os.path.join(
-                get_env_values("MODEL_PATH"), get_env_values("MODEL_NAME")
+                get_env_values("MODEL_PATH"), get_env_values("MODEL_NAME"), ".cpkt"
             )
             if not os.path.exists(model_folder):
                 os.makedirs(model_folder)
@@ -71,7 +71,7 @@ class AIBrain(PlayerBrain):
 
     def load_model(self):
         model_folder = os.path.join(
-            get_env_values("MODEL_PATH"), get_env_values("MODEL_NAME")
+            get_env_values("MODEL_PATH"), get_env_values("MODEL_NAME"), ".cpkt"
         )
         if os.path.exists(model_folder):
             self.model = LiteModel.from_file(os.path.join(model_folder, "stronger"))

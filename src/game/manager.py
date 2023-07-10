@@ -14,6 +14,7 @@ def get_tick_time_length():
 
 class GameManager:
     def __init__(self) -> None:
+        self.tick_limit = 0
         self.tick = 0
 
         self.average_last_tick = 0
@@ -53,7 +54,9 @@ class GameManager:
 
     def game_tick(self):
         logging.debug("Starting game_tick tgame hread")
-        while is_app_alive():
+        while (self.tick_limit > 0 and self.tick < self.tick_limit) or (
+            self.tick_limit <= 0 and is_app_alive()
+        ):
             if float(get_env_values("TPS_SPEED")) > 0:
                 start = current_time()
 
@@ -173,13 +176,15 @@ class GameManager:
     def check_goals(self):
         for goal in self.goals:
             for ball in self.balls:
-                if goal.is_inside(ball.X, ball.Y, ball.size/2):
+                if goal.is_inside(ball.X, ball.Y, ball.size / 2):
                     ball.last_touch.points += 10
                     ball.respawn()
 
     def second_tick(self):
         logging.debug("Starting second_tick game thread")
-        while is_app_alive():
+        while (self.tick_limit > 0 and self.tick < self.tick_limit) or (
+            self.tick_limit <= 0 and is_app_alive()
+        ):
             sleep(1)
 
             self.average_tps = self.tick - self.average_last_tick
