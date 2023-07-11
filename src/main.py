@@ -34,7 +34,7 @@ class AppManager:
         self.game = GameManager()
 
         logging.info("Starting game...")
-        self.game_thread = threading.Thread(target=self.game.launch)
+        self.game_thread = threading.Thread(target=self.game.launch, kwargs={"second_tick": True})
 
         self.ui = GameUI(self.game)
         self.ui_thread = threading.Thread(target=self.ui.launch)

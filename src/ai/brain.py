@@ -54,27 +54,25 @@ class LiteModel:
 
 
 class AIBrain(PlayerBrain):
-    def __init__(self) -> None:
+    def __init__(self, model_name: str = "latest.cpkt") -> None:
         super().__init__()
         self.model = None
-        self.load_model()
+        self.load_model(model_name)
         logging.debug(self.model)
 
-    def save_model(self):
+    def save_model(self, model_name: str = "latest.cpkt"):
         if self.model is not None:
             model_folder = os.path.join(
-                get_env_values("MODEL_PATH"), get_env_values("MODEL_NAME"), ".cpkt"
+                get_env_values("MODEL_PATH"), get_env_values("MODEL_NAME")
             )
-            if not os.path.exists(model_folder):
-                os.makedirs(model_folder)
-            self.model.save(os.path.join(model_folder, "stronger"))
+            self.model.save(os.path.join(model_folder, model_name))
 
-    def load_model(self):
+    def load_model(self, model_name: str):
         model_folder = os.path.join(
-            get_env_values("MODEL_PATH"), get_env_values("MODEL_NAME"), ".cpkt"
+            get_env_values("MODEL_PATH"), get_env_values("MODEL_NAME")
         )
-        if os.path.exists(model_folder):
-            self.model = LiteModel.from_file(os.path.join(model_folder, "stronger"))
+        if os.path.exists(os.path.join(model_folder, model_name)):
+            self.model = LiteModel.from_file(os.path.join(model_folder, model_name))
         else:
             self.model = tf.keras.Sequential(
                 [

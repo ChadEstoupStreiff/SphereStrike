@@ -24,8 +24,8 @@ class GameManager:
         self.second_thread = None
 
         self.players = [
-            Player(X=200, brain=RandomBrain(), color="green"),
-            Player(X=1000, brain=AIBrain(), color="purple"),
+            Player(brain=AIBrain(), color="green"),
+            Player(brain=AIBrain(), color="purple"),
         ]
         self.balls = [Ball()]
         self.goals = [
@@ -39,17 +39,37 @@ class GameManager:
             ),
         ]
 
+        self.reset()
+
+    def reset(self):
+        self.tick = 0
+
+        self.average_last_tick = 0
+        self.average_tps = 0
+
+        self.game_thread = None
+        self.second_thread = None
+
         for ball in self.balls:
             ball.respawn()
+        for index, player in enumerate(self.players):
+            player.points = 0
+            player.v_X = 0
+            player.v_Y = 0
+            player.X = index * 1000 % int(get_env_values("TERRAIN_X_SIZE")) + 250
+            player.Y = 0
 
-    def launch(self):
-        self.second_thread = threading.Thread(target=self.second_tick)
-        self.second_thread.start()
+
+    def launch(self, second_tick=False):
+        if second_tick:
+            self.second_thread = threading.Thread(target=self.second_tick)
+            self.second_thread.start()
 
         self.game_thread = threading.Thread(target=self.game_tick)
         self.game_thread.start()
 
-        self.second_thread.join()
+        if second_tick:
+            self.second_thread.join()
         self.game_thread.join()
 
     def game_tick(self):

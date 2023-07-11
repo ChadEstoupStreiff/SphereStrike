@@ -19,3 +19,7 @@ Make sure you have conda environment enabled.
 
 Execute launch script  
 > bash launch.sh
+
+# TODO
+- Reverse map info for 2nd IA in map
+- Copy of Player class

@@ -3,3 +3,4 @@ tk==0.1.*
 numpy
 tensorflow
 keras
+tqdm

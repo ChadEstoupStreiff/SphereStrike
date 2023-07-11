@@ -46,6 +46,9 @@ class KeyBoardBrain(PlayerBrain):
 
 
 class Player(ColidableEntity, GravityEntity):
+    def copy(player):
+        return player
+
     def __init__(
         self,
         color: str = "yellow",
